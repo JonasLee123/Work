@@ -1,100 +1,20 @@
-var db = require('./databaseConfig.js');
-var config = require('../config.js');
+package main
 
-var userDB = {
-    getUser: function (userid, callback) {
+import (
+	"fmt"
+	"net/http"
+)
 
-        var conn = db.getConnection();
-        conn.connect(function (err) {
-            if (err) {
-                console.log(err);
-                return callback(err, null);
-            }
-            else{
-                console.log("***Connected!");
-				
-                var sql = `SELECT userid,email,username FROM user WHERE userid = ?`;
-
-			
-				conn.query(sql, [userid], function(err, result){
-
-                    conn.end();
-                    if(err){
-                        console.log(err);
-                        return callback(err, null);
-                    }
-					//V1
-					else { 
-						console.log(result);
-						return callback(null, result);
-
-                    }
-					//V2 for showing of only 1 record
-					/*else { 
-						var arrResult=[]
-						console.log(result);
-						arrResult.push(result[0]);//show only 1 matching record
-                        //return callback(null, result);
-						return callback(null, arrResult);
-
-                    }*/
-                });
-            }
-        });
-    },
-
-	getUsers: function (callback) {
-
-        var conn = db.getConnection();
-        conn.connect(function (err) {
-            if (err) {
-                console.log(err);
-                return callback(err, null);
-            }
-            else{
-                console.log("***Connected!");
-				
-                var sql = 'SELECT userid,username,email FROM user ';
-                conn.query(sql, [], function(err, result){
-                    conn.end();
-                    if(err){
-                        console.log(err);
-                        return callback(err, null);
-                    } else {  
-                        return callback(null, result);
-                    }
-                });
-            }
-        });
-    },
-    insertUser:function(username,email,role,password,callback){
-
-        var dbConn=db.getConnection();
-
-        dbConn.connect(function(err){
-
-            if(err){
-                console.log(err);
-                return callback(err,null);
-
-            }else{
-                var sql=`insert into user(username,email,role,password) Values(?,?,?,?)`;
-
-                dbConn.query(sql,[username,email,role,password],function(err,result){
-
-                    dbConn.end();
-                    if(err){
-                        console.log(err);
-                    }else{
-
-                        console.log(result);
-                    }
-                    return callback(err,result);
-                });
-            }
-        });
-    }
-};
-
-module.exports = userDB;
-
+func serve() {
+	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		username := r.Form.Get("username")
+		if !isValidUsername(username) {
+			// BAD: a request parameter is incorporated without validation into the response
+			fmt.Fprintf(w, "%q is an unknown user", username)
+		} else {
+			// TODO: Handle successful login
+		}
+	})
+	http.ListenAndServe(":80", nil)
+}
